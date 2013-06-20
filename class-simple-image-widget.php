@@ -100,6 +100,13 @@ class Simple_Image_Widget extends WP_Widget {
 			$instance['link_open'] = '<a href="' . esc_url( $instance['link'] ) . '"' . $target . '>';
 			$instance['link_close'] = '</a>';
 		}
+        $instance['img_link_open'] = '';
+        $instance['img_link_close'] = '';
+        if ( ! empty ( $instance['img_link'] ) ) {
+            $target = ( empty( $instance['img_new_window'] ) ) ? '' : ' target="_blank"';
+            $instance['img_link_open'] = '<a href="' . esc_url( $instance['img_link'] ) . '"' . $target . '>';
+            $instance['img_link_close'] = '</a>';
+        }
 
 		$output = $args['before_widget'];
 
@@ -114,17 +121,17 @@ class Simple_Image_Widget extends WP_Widget {
 					$image_size = ( ! empty( $instance['image_size'] ) ) ? $instance['image_size'] : apply_filters( 'simple_image_widget_output_default_size', 'medium', $this->id_base );
 
 					$output .= sprintf( '<p class="simple-image">%s%s%s</p>',
-						$instance['link_open'],
+						$instance['img_link_open'],
 						wp_get_attachment_image( $instance['image_id'], $image_size ),
-						$instance['link_close']
+						$instance['img_link_close']
 					);
 				} elseif ( ! empty( $instance['image'] ) ) {
 					// Legacy output.
 					$output .= sprintf( '%s<img src="%s" alt="%s">%s',
-						$instance['link_open'],
+						$instance['img_link_open'],
 						esc_url( $instance['image'] ),
 						( empty( $instance['alt'] ) ) ? '' : esc_attr( $instance['alt'] ),
-						$instance['link_close']
+						$instance['img_link_close']
 					);
 				}
 
@@ -155,6 +162,7 @@ class Simple_Image_Widget extends WP_Widget {
 			'image'      => '', // Legacy URL field.
 			'image_id'   => '',
 			'image_size' => 'full',
+            'img_link'   => '',
 			'link'       => '',
 			'link_text'  => '',
 			'new_window' => '',
@@ -243,6 +251,21 @@ class Simple_Image_Widget extends WP_Widget {
 							<?php
 							break;
 
+                        case 'img_link' :
+                            ?>
+                            <p style="margin-bottom: 0.25em">
+                                <label for="<?php echo $this->get_field_id( 'img_link' ); ?>"><?php _e( 'Image Link:', 'simple-image-widget' ); ?></label>
+                                <input type="text" name="<?php echo $this->get_field_name( 'img_link' ); ?>" id="<?php echo $this->get_field_id( 'img_link' ); ?>" value="<?php echo esc_url( $instance['img_link'] ); ?>" class="widefat">
+                            </p>
+                            <p style="padding-left: 2px">
+                                <label for="<?php echo $this->get_field_id( 'img_new_window' ); ?>">
+                                    <input type="checkbox" name="<?php echo $this->get_field_name( 'img_new_window' ); ?>" id="<?php echo $this->get_field_id( 'img_new_window' ); ?>" <?php checked( $instance['img_new_window'] ); ?>>
+                                    <?php _e( 'Open in new window?', 'simple-image-widget' ); ?>
+                                </label>
+                            </p>
+                            <?php
+							break;
+
 						case 'link' :
 							?>
 							<p style="margin-bottom: 0.25em">
@@ -298,7 +321,7 @@ class Simple_Image_Widget extends WP_Widget {
 	 * @since 3.0.0
 	 */
 	function form_fields() {
-		$fields = array( 'link', 'link_text', 'text' );
+		$fields = array('img_link', 'link', 'link_text', 'text' );
 
 		// Don't show the image size field for users with older WordPress versions.
 		if ( ! is_simple_image_widget_legacy() ) {
@@ -320,6 +343,7 @@ class Simple_Image_Widget extends WP_Widget {
 
 		$instance['title'] = wp_strip_all_tags( $new_instance['title'] );
 		$instance['image_id'] = absint( $new_instance['image_id'] );
+        $instance['img_link'] = esc_url_raw( $new_instance['img_link'] );
 		$instance['link'] = esc_url_raw( $new_instance['link'] );
 		$instance['link_text'] = wp_kses_data( $new_instance['link_text'] );
 		$instance['new_window'] = isset( $new_instance['new_window'] );
